@@ -29,19 +29,24 @@ def load_data(dataset_path, resolution, dataset, pid_num, pid_shuffle, cache=Tru
                     seq_type.append(_seq_type)
                     view.append(_view)
 
-    pid_fname = osp.join('partition', '{}_{}_{}.npy'.format(
+    pid_fname1 = osp.join('partition', '{}_{}_{}1.npy'.format(
         dataset, pid_num, pid_shuffle))
-    if not osp.exists(pid_fname):
+    pid_fname2 = osp.join('partition', '{}_{}_{}2.npy'.format(
+        dataset, pid_num, pid_shuffle))
+    if not osp.exists(pid_fname1):
         pid_list = sorted(list(set(label)))
         if pid_shuffle:
             np.random.shuffle(pid_list)
-        pid_list = [pid_list[0:pid_num], pid_list[pid_num:]]
+        pid_list_1 = [pid_list[0:pid_num]]
+        pid_list_2 = [pid_list[pid_num:]]
         os.makedirs('partition', exist_ok=True)
-        np.save(pid_fname, pid_list)
+        np.save(pid_fname1, pid_list_1)
+        np.save(pid_fname2, pid_list_2)
 
-    pid_list = np.load(pid_fname)
-    train_list = pid_list[0]
-    test_list = pid_list[1]
+    pid_list_1 = np.load(pid_fname1, allow_pickle=True)
+    pid_list_2 = np.load(pid_fname2, allow_pickle=True)
+    train_list = pid_list_1
+    test_list = pid_list_2
     train_source = DataSet(
         [seq_dir[i] for i, l in enumerate(label) if l in train_list],
         [label[i] for i, l in enumerate(label) if l in train_list],
